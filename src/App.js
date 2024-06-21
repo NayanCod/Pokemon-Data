@@ -1,25 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import CardsContainer from "./components/CardsContainer";
 
 function App() {
+  const [cardsList, setCardsList] = useState([]);
+  const [nextUrl, setNextUrl] = useState("https://pokeapi.co/api/v2/pokemon");
+
+    const getPokiData = async(url) => {
+      const data = await fetch(url);
+      const json = await data.json();
+      setNextUrl(json.next);
+      setCardsList(prevList => [...prevList, ...json.results]);
+    }
+
+    useEffect(() => {
+      getPokiData(nextUrl);
+    }, []);
+
+    const loadMore = () => {
+      if (nextUrl) {
+        getPokiData(nextUrl); // Fetch next page of data
+      }
+    };
+    if(!cardsList) return null
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <> 
+      <h1 className="text-4xl font-bold my-3 text-center">Pokimon Data</h1>
+      <CardsContainer cardsList={cardsList}/>
+      
+      <button onClick={loadMore} className='my-4 bg-blue-500 block hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-auto cursor-pointer'>Load more</button>
+    </>
+  )
 }
 
 export default App;
